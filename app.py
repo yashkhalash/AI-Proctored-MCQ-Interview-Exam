@@ -14,6 +14,19 @@ if "started" not in st.session_state:
     st.session_state.started = False
 if "submitted" not in st.session_state:
     st.session_state.submitted = False
+if "camera_consent" not in st.session_state:
+    st.session_state.camera_consent = False
+
+@st.dialog("Camera Access Required")
+def camera_permission_modal():
+    st.write(
+        "This exam uses your webcam to proctor the session — checking for your "
+        "face, detecting when you look away, and flagging multiple faces in frame."
+    )
+    st.caption("No video is uploaded anywhere; frames are analyzed locally in this session only.")
+    if st.button("Enable Camera", type="primary"):
+        st.session_state.camera_consent = True
+        st.rerun()
 
 st.title("🎯 AI-Proctored MCQ Interview Exam")
 st.caption("Local-first demo: MCQs + webcam proctoring + offline/network recovery.")
@@ -66,22 +79,27 @@ with col1:
 
 with col2:
     st.subheader("Webcam")
-    camera = st.camera_input("Take a proctoring frame", key="proctor_camera")
-    if camera:
-        event = st.session_state.proctor.analyze(camera.getvalue())
-        if event:
-            st.warning(event["message"])
-            if event["disqualified"]:
-                st.error("❌ Candidate disqualified.")
-                save_result(candidate, {
-                    **st.session_state.engine.result(),
-                    "status": "DISQUALIFIED",
-                    "proctor": st.session_state.proctor.summary()
-                })
-                st.session_state.submitted = True
-                st.rerun()
+    if not st.session_state.camera_consent:
+        st.info("Camera access is required to continue the proctored exam.")
+        if st.button("Request Camera Access"):
+            camera_permission_modal()
     else:
-        st.caption("For a production implementation, use continuous browser webcam capture via a custom Streamlit component/WebRTC.")
+        camera = st.camera_input("Take a proctoring frame", key="proctor_camera")
+        if camera:
+            event = st.session_state.proctor.analyze(camera.getvalue())
+            if event:
+                st.warning(event["message"])
+                if event["disqualified"]:
+                    st.error("❌ Candidate disqualified.")
+                    save_result(candidate, {
+                        **st.session_state.engine.result(),
+                        "status": "DISQUALIFIED",
+                        "proctor": st.session_state.proctor.summary()
+                    })
+                    st.session_state.submitted = True
+                    st.rerun()
+        else:
+            st.caption("For a production implementation, use continuous browser webcam capture via a custom Streamlit component/WebRTC.")
 
     st.divider()
     monitor = NetworkMonitor()
