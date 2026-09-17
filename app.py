@@ -54,11 +54,34 @@ if not st.session_state.started:
     st.stop()
 
 if st.session_state.submitted:
-    st.success("Exam submitted.")
+    if st.session_state.get("disqualified"):
+        st.error("❌ Exam auto-submitted: disqualified for repeated proctoring violations.")
+    else:
+        st.success("Exam submitted.")
     st.stop()
 
 candidate = st.session_state.candidate
 st.write(f"Candidate: **{candidate}**")
+
+alert_slot = st.empty()
+violations = st.session_state.proctor.violations
+limit = st.session_state.proctor.warning_limit
+if violations > 0:
+    with alert_slot.container():
+        st.markdown(
+            f"""
+            <div style="background-color:#4a0000;border:2px solid #ff4b4b;
+                        border-radius:8px;padding:14px 18px;margin-bottom:12px;">
+                <span style="color:#ff4b4b;font-weight:700;font-size:1.05rem;">
+                    🔴 Proctoring Warning {violations}/{limit + 1}
+                </span><br>
+                <span style="color:#ffcccc;">
+                    {st.session_state.proctor.events[-1]['message']}
+                </span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
 col1, col2 = st.columns([2,1])
 with col1:
@@ -88,15 +111,19 @@ with col2:
         if camera:
             event = st.session_state.proctor.analyze(camera.getvalue())
             if event:
-                st.warning(event["message"])
                 if event["disqualified"]:
-                    st.error("❌ Candidate disqualified.")
+                    st.toast("❌ Final warning — exam disqualified", icon="🚨")
+                    st.error("🚨 FINAL WARNING: Exam auto-submitted due to repeated violations.")
                     save_result(candidate, {
                         **st.session_state.engine.result(),
                         "status": "DISQUALIFIED",
                         "proctor": st.session_state.proctor.summary()
                     })
                     st.session_state.submitted = True
+                    st.session_state.disqualified = True
+                    st.rerun()
+                else:
+                    st.toast(event["message"], icon="⚠️")
                     st.rerun()
         else:
             st.caption("For a production implementation, use continuous browser webcam capture via a custom Streamlit component/WebRTC.")
