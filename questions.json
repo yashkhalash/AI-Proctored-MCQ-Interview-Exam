@@ -1,0 +1,27 @@
+[
+  {
+    "question": "Which technique is commonly used to reduce overfitting in neural networks?",
+    "options": ["Dropout", "Tokenization", "Normalization only", "Hashing"],
+    "answer": "Dropout"
+  },
+  {
+    "question": "What does RAG commonly stand for in AI applications?",
+    "options": ["Retrieval-Augmented Generation", "Random AI Graph", "Recursive Agent Gateway", "Real-time Answer Generator"],
+    "answer": "Retrieval-Augmented Generation"
+  },
+  {
+    "question": "Which Python library is commonly used to build data science workflows?",
+    "options": ["pandas", "pytest", "flask-only", "tkinter-only"],
+    "answer": "pandas"
+  },
+  {
+    "question": "Which metric is commonly used for binary classification?",
+    "options": ["Accuracy", "BLEU only", "PageRank only", "TF-IDF"],
+    "answer": "Accuracy"
+  },
+  {
+    "question": "What is an embedding?",
+    "options": ["A numeric representation of data", "A database password", "A compiler", "A web server"],
+    "answer": "A numeric representation of data"
+  }
+]
