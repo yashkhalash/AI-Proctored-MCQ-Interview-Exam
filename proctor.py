@@ -1,6 +1,9 @@
+import os
 from datetime import datetime
 import cv2
 import numpy as np
+
+CASCADE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cascades")
 
 class Proctor:
     """
@@ -13,8 +16,8 @@ class Proctor:
         self.warning_limit = 2
         self.violations = 0
         self.events = []
-        self.face = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
-        self.eye = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_eye.xml")
+        self.face = cv2.CascadeClassifier(os.path.join(CASCADE_DIR, "haarcascade_frontalface_default.xml"))
+        self.eye = cv2.CascadeClassifier(os.path.join(CASCADE_DIR, "haarcascade_eye.xml"))
 
     def analyze(self, image_bytes):
         arr = np.frombuffer(image_bytes, np.uint8)
